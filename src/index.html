@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prototypes</title>
+  <link rel="stylesheet" href="./styles/main.scss" />
+  <style>
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--lui-border-main);
+      margin-bottom: 40px;
+    }
+    .header__logo {
+      font: var(--lui-font-text-xl);
+      font-weight: 700;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      font: var(--lui-font-text-xs);
+      font-weight: 600;
+      border-radius: 6px;
+      background-color: var(--lui-surface-secondary);
+      color: var(--lui-text-secondary);
+    }
+    .catalog {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      padding-bottom: 60px;
+    }
+    .catalog a {
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <span class="header__logo">Fortis</span>
+      <span class="badge">Prototypes</span>
+    </header>
+
+    <div class="catalog">
+      <!-- Add cards here as you create new prototypes -->
+
+      <a href="#" class="card">
+        <h2 class="card__title">Example Prototype</h2>
+        <p class="card__description">Replace this card with links to your actual prototype pages.</p>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

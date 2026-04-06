@@ -1,0 +1,100 @@
+@use '@frontend/lui/themes' as themes;
+@use '@frontend/lui/fonts';
+@use '@frontend/lui/typography';
+
+:root {
+  @include themes.fortis-theme;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: var(--lui-font-text-m);
+  font-family: var(--lui-font-family);
+  color: var(--lui-text-main);
+  background-color: var(--lui-page-bg-zero);
+}
+
+a {
+  color: var(--lui-text-active);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Utility classes */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.card {
+  background: var(--lui-surface-primary);
+  border: 1px solid var(--lui-border-main);
+  border-radius: 12px;
+  padding: 24px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--lui-border-active);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.card__title {
+  font: var(--lui-font-text-l);
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.card__description {
+  font: var(--lui-font-text-s);
+  color: var(--lui-text-secondary);
+  margin: 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font: var(--lui-font-text-m);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn--primary {
+  background-color: var(--lui-button-bg-primary-main);
+  color: var(--lui-button-text-primary);
+}
+
+.btn--primary:hover {
+  background-color: var(--lui-button-bg-primary-hover);
+}
+
+.btn--secondary {
+  background-color: var(--lui-button-bg-secondary-main);
+  color: var(--lui-button-text-secondary);
+}
+
+.btn--secondary:hover {
+  background-color: var(--lui-button-bg-secondary-hover);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--lui-text-active);
+  padding: 10px 12px;
+}
+
+.btn--ghost:hover {
+  background-color: var(--lui-surface-secondary);
+}
