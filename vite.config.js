@@ -17,6 +17,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(__dirname, 'src/index.html'),
+        customersSegments: resolve(__dirname, 'src/customers-segments.html'),
       },
     },
   },

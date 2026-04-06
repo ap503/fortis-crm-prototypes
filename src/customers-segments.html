@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customers — Segments</title>
+  <link rel="stylesheet" href="./styles/main.scss" />
+  <style>
+    /* ── Page shell ─────────────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 28px 0 0;
+    }
+    .page-title {
+      font: var(--lui-font-text-2xl, var(--lui-font-text-xl));
+      font-weight: 700;
+      margin: 0;
+    }
+    .tab-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font: var(--lui-font-text-s);
+      font-weight: 500;
+      color: var(--lui-text-secondary);
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .tab-link:hover { background: var(--lui-surface-secondary); color: var(--lui-text-main); text-decoration: none; }
+    .tab-link .beta-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: var(--lui-surface-secondary);
+      color: var(--lui-text-secondary);
+      border: 1px solid var(--lui-border-main);
+    }
+
+    /* ── Segments bar ───────────────────────────────────────── */
+    .segments-bar {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .segments-group-label {
+      font: var(--lui-font-text-xs);
+      font-weight: 600;
+      color: var(--lui-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 0;
+      padding: 0 2px;
+    }
+    .segments-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* chip */
+    .segment-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1.5px solid var(--lui-border-main);
+      background: var(--lui-surface-primary);
+      font: var(--lui-font-text-s);
+      font-weight: 500;
+      color: var(--lui-text-main);
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .segment-chip:hover {
+      border-color: var(--lui-border-active);
+      background: var(--lui-surface-secondary);
+    }
+    .segment-chip.active {
+      border-color: var(--lui-border-active, #1DB954);
+      background: var(--lui-surface-active, #E8F8EE);
+      color: var(--lui-text-active, #15803d);
+      font-weight: 600;
+    }
+    .segment-chip .chip-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--lui-surface-secondary);
+      color: var(--lui-text-secondary);
+      transition: background 0.15s, color 0.15s;
+    }
+    .segment-chip.active .chip-count {
+      background: rgba(21,128,61,0.15);
+      color: var(--lui-text-active, #15803d);
+    }
+
+    /* divider between groups */
+    .segments-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--lui-border-main);
+      align-self: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Tooltip ────────────────────────────────────────────── */
+    .segment-chip .tooltip {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--lui-surface-tooltip, #1a1a2e);
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      transition: opacity 0.15s;
+      z-index: 100;
+    }
+    .segment-chip .tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--lui-surface-tooltip, #1a1a2e);
+    }
+    .segment-chip:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* ── Toolbar (Add / Filter / Search) ────────────────────── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .toolbar-right { margin-left: auto; }
+    .search-field {
+      display: inline-flex;
+      align-items: center;
+      height: 40px;
+      padding: 0 12px;
+      border: 1.5px solid var(--lui-border-main);
+      border-radius: 8px;
+      background: var(--lui-surface-primary);
+      font: var(--lui-font-text-s);
+      color: var(--lui-text-main);
+      outline: none;
+      min-width: 160px;
+      transition: border-color 0.15s;
+    }
+    .search-field::placeholder { color: var(--lui-text-tertiary, var(--lui-text-secondary)); }
+    .search-field:focus { border-color: var(--lui-border-active); }
+
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1.5px solid var(--lui-border-main);
+      background: var(--lui-surface-primary);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      color: var(--lui-text-secondary);
+      flex-shrink: 0;
+    }
+    .btn-icon:hover { background: var(--lui-surface-secondary); border-color: var(--lui-border-active); }
+
+    /* ── Stats row ──────────────────────────────────────────── */
+    .stats-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 14px;
+      font: var(--lui-font-text-s);
+      color: var(--lui-text-secondary);
+    }
+    .stats-row .total { font-weight: 500; color: var(--lui-text-main); }
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--lui-text-active, #15803d);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .action-link:hover { text-decoration: underline; }
+
+    /* ── Table ──────────────────────────────────────────────── */
+    .table-wrap {
+      margin-top: 10px;
+      border: 1px solid var(--lui-border-main);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--lui-surface-primary);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font: var(--lui-font-text-s);
+    }
+    thead th {
+      padding: 10px 16px;
+      text-align: left;
+      background: var(--lui-surface-secondary);
+      border-bottom: 1px solid var(--lui-border-main);
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--lui-text-main);
+      white-space: nowrap;
+    }
+    thead th .sub {
+      display: block;
+      font-weight: 400;
+      color: var(--lui-text-secondary);
+      margin-top: 1px;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--lui-border-main);
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--lui-surface-secondary); }
+    tbody td {
+      padding: 12px 16px;
+      vertical-align: middle;
+      color: var(--lui-text-main);
+    }
+    .td-sub {
+      font-size: 12px;
+      color: var(--lui-text-secondary);
+      margin-top: 2px;
+    }
+    .name-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--lui-surface-secondary);
+      border: 1px solid var(--lui-border-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--lui-text-secondary);
+    }
+    .loyalty-yes {
+      display: inline-flex;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #e8f8ee;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+    .loyalty-no {
+      display: inline-flex;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--lui-surface-secondary);
+      color: var(--lui-text-secondary);
+      border: 1px solid var(--lui-border-main);
+    }
+    /* segment badge shown on row */
+    .row-segment {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 3px;
+    }
+    .seg-new       { background: #dbeafe; color: #1d4ed8; }
+    .seg-active    { background: #d1fae5; color: #065f46; }
+    .seg-regulars  { background: #fef3c7; color: #92400e; }
+    .seg-at-risk   { background: #ffedd5; color: #9a3412; }
+    .seg-churned   { background: #fee2e2; color: #991b1b; }
+    .seg-never     { background: #f3f4f6; color: #374151; }
+    .seg-top       { background: #ede9fe; color: #5b21b6; }
+
+    .more-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--lui-text-secondary);
+      padding: 4px;
+      border-radius: 4px;
+    }
+    .more-btn:hover { background: var(--lui-surface-secondary); }
+  </style>
+</head>
+<body>
+  <div class="container" style="padding-bottom: 60px;">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <h1 class="page-title">Customers</h1>
+      <a href="#" class="tab-link">
+        Marketing Campaign
+        <span class="beta-badge">Beta</span>
+      </a>
+    </div>
+
+    <!-- ── Segments bar ──────────────────────────────────────── -->
+    <div class="segments-bar" style="margin-top: 20px;">
+
+      <!-- Lifecycle group -->
+      <p class="segments-group-label">Lifecycle</p>
+      <div class="segments-row" id="segments-row">
+
+        <div class="segment-chip active" data-segment="all" onclick="selectSegment(this)">
+          All
+          <span class="chip-count">15</span>
+          <span class="tooltip">All customers in your account.</span>
+        </div>
+
+        <div class="segment-chip" data-segment="new" onclick="selectSegment(this)">
+          New
+          <span class="chip-count">3</span>
+          <span class="tooltip">First-time customers who made their first purchase in the last 30 days.</span>
+        </div>
+
+        <div class="segment-chip" data-segment="active" onclick="selectSegment(this)">
+          Active
+          <span class="chip-count">5</span>
+          <span class="tooltip">Returning customers who placed at least one order in the last 30 days.</span>
+        </div>
+
+        <div class="segment-chip" data-segment="regulars" onclick="selectSegment(this)">
+          Regulars
+          <span class="chip-count">2</span>
+          <span class="tooltip">Your best repeat customers — placed 2 or more orders in the last 30 days.</span>
+        </div>
+
+        <div class="segment-chip" data-segment="at-risk" onclick="selectSegment(this)">
+          At-Risk
+          <span class="chip-count">3</span>
+          <span class="tooltip">Customers who haven't purchased in 31 to 90 days. A good time to re-engage them.</span>
+        </div>
+
+        <div class="segment-chip" data-segment="churned" onclick="selectSegment(this)">
+          Churned
+          <span class="chip-count">1</span>
+          <span class="tooltip">Customers who haven't purchased in over 90 days. They may need a reason to come back.</span>
+        </div>
+
+        <div class="segment-chip" data-segment="never" onclick="selectSegment(this)">
+          Never Purchased
+          <span class="chip-count">1</span>
+          <span class="tooltip">Customers who have been added but haven't made a purchase yet.</span>
+        </div>
+
+        <span class="segments-divider"></span>
+
+        <!-- Rankings group label inline for compact layout -->
+        <div class="segment-chip" data-segment="top-spenders" onclick="selectSegment(this)">
+          Top Spenders
+          <span class="chip-count">5</span>
+          <span class="tooltip">Customers ranked by total amount spent in the last 30 days.</span>
+        </div>
+
+        <div class="segment-chip" data-segment="most-frequent" onclick="selectSegment(this)">
+          Most Frequent
+          <span class="chip-count">5</span>
+          <span class="tooltip">Customers ranked by number of purchases in the last 30 days.</span>
+        </div>
+
+        <div class="segment-chip" data-segment="highest-avg" onclick="selectSegment(this)">
+          Highest Avg Spend
+          <span class="chip-count">5</span>
+          <span class="tooltip">Customers ranked by their average order value in the last 30 days.</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Toolbar ────────────────────────────────────────────── -->
+    <div class="toolbar">
+      <button class="btn btn--primary" style="height:40px; gap:6px; padding: 0 16px; border-radius:8px;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Add New
+      </button>
+
+      <button class="btn btn--secondary" style="height:40px; gap:6px; padding: 0 14px; border-radius:8px;">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M6 12h12M9 18h6"/></svg>
+        Filter
+      </button>
+
+      <input class="search-field" type="text" placeholder="First Name" />
+      <input class="search-field" type="text" placeholder="Last Name" />
+      <input class="search-field" type="text" placeholder="Phone Number" />
+
+      <button class="btn-icon" title="Help">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </button>
+    </div>
+
+    <!-- ── Stats row ──────────────────────────────────────────── -->
+    <div class="stats-row">
+      <span>Total: <span class="total" id="total-count">15</span></span>
+      <a href="#" class="action-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download
+      </a>
+      <a href="#" class="action-link" style="margin-left:auto;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import
+      </a>
+    </div>
+
+    <!-- ── Table ──────────────────────────────────────────────── -->
+    <div class="table-wrap" id="customer-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Full Name <span class="sub">Comment</span></th>
+            <th>Phone Number <span class="sub">Email</span></th>
+            <th>Loyalty Program</th>
+            <th>Date of Birth <span class="sub">Gender</span></th>
+            <th>Registration Channel <span class="sub">Creation Date</span></th>
+            <th>Address</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <!-- rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+    const customers = [
+      { name: 'Hamad',          phone: '+971 50 252 4262', loyalty: true,  dob: '—',          gender: '—',      channel: 'Card Machine',  date: '03.04.2026', segment: 'new' },
+      { name: 'Rahul',          phone: '+971 54 321 7242', loyalty: true,  dob: '—',          gender: '—',      channel: 'Card Machine',  date: '03.04.2026', segment: 'new' },
+      { name: 'Alexey',         phone: '+971 58 566 4733', loyalty: true,  dob: '—',          gender: '—',      channel: 'Card Machine',  date: '25.03.2026', segment: 'active' },
+      { name: 'Ahmed Eljarawani',phone: '+971 58 586 7892', loyalty: false, dob: '—',          gender: '—',      channel: 'Self sign up',  date: '25.03.2026', segment: 'never' },
+      { name: 'Moammar',        phone: '+971 55 520 0300', loyalty: false, dob: '—',          gender: 'Male',   channel: 'Card Machine',  date: '25.03.2026', segment: 'regulars' },
+      { name: 'Mayas',          phone: '+971 52 716 7225', loyalty: true,  dob: '—',          gender: '—',      channel: 'Card Machine',  date: '25.03.2026', segment: 'active' },
+      { name: 'Alex',           phone: '+971 50 470 1218', loyalty: false, dob: '—',          gender: '—',      channel: 'Card Machine',  date: '24.03.2026', segment: 'at-risk' },
+      { name: 'Rama Alwidian',  phone: '+971 50 481 5082', loyalty: false, dob: '09.07.2003', gender: 'Female', channel: 'Self sign up',  date: '24.03.2026', segment: 'active' },
+      { name: 'Mayar',          phone: '+971 54 775 7801', loyalty: false, dob: '—',          gender: '—',      channel: 'POS Platform',  date: '18.03.2026', segment: 'regulars' },
+      { name: 'Sara Al-Hassan', phone: '+971 56 123 4567', loyalty: true,  dob: '—',          gender: 'Female', channel: 'Card Machine',  date: '15.03.2026', segment: 'active' },
+      { name: 'Omar Khalil',    phone: '+971 54 987 6543', loyalty: true,  dob: '12.05.1990', gender: 'Male',   channel: 'Self sign up',  date: '10.03.2026', segment: 'new' },
+      { name: 'Layla Nasser',   phone: '+971 52 345 6789', loyalty: false, dob: '—',          gender: 'Female', channel: 'Card Machine',  date: '01.02.2026', segment: 'at-risk' },
+      { name: 'Faisal Al-Mutairi',phone:'+971 50 654 3210',loyalty: false, dob: '—',          gender: 'Male',   channel: 'POS Platform',  date: '15.01.2026', segment: 'at-risk' },
+      { name: 'Nour Ibrahim',   phone: '+971 55 876 5432', loyalty: false, dob: '—',          gender: 'Female', channel: 'Self sign up',  date: '05.12.2025', segment: 'churned' },
+      { name: 'Khalid Al-Farsi',phone: '+971 56 234 5678', loyalty: true,  dob: '20.08.1985', gender: 'Male',   channel: 'Card Machine',  date: '01.12.2025', segment: 'active' },
+    ];
+
+    const segmentMeta = {
+      'new':           { label: 'New',               cls: 'seg-new' },
+      'active':        { label: 'Active',             cls: 'seg-active' },
+      'regulars':      { label: 'Regular',            cls: 'seg-regulars' },
+      'at-risk':       { label: 'At-Risk',            cls: 'seg-at-risk' },
+      'churned':       { label: 'Churned',            cls: 'seg-churned' },
+      'never':         { label: 'Never Purchased',    cls: 'seg-never' },
+    };
+
+    // Ranking segments reuse same customers but ordered differently
+    const rankingSegments = {
+      'top-spenders':   [...customers].filter(c => c.loyalty).slice(0, 5),
+      'most-frequent':  [...customers].filter(c => ['regulars','active'].includes(c.segment)).slice(0, 5),
+      'highest-avg':    [...customers].filter(c => c.loyalty || c.segment === 'new').slice(0, 5),
+    };
+
+    let activeSegment = 'all';
+
+    function selectSegment(el) {
+      document.querySelectorAll('.segment-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      activeSegment = el.dataset.segment;
+      renderTable();
+    }
+
+    function getRows() {
+      if (activeSegment === 'all') return customers;
+      if (rankingSegments[activeSegment]) return rankingSegments[activeSegment];
+      return customers.filter(c => c.segment === activeSegment);
+    }
+
+    function renderTable() {
+      const rows = getRows();
+      document.getElementById('total-count').textContent = rows.length;
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = rows.map(c => {
+        const meta = segmentMeta[c.segment];
+        const segBadge = meta
+          ? `<div class="row-segment ${meta.cls}">${meta.label}</div>`
+          : '';
+        return `<tr>
+          <td>
+            <div class="name-cell">
+              <div class="avatar">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:500;">${c.name}</div>
+                ${segBadge}
+              </div>
+            </div>
+          </td>
+          <td>
+            <div>${c.phone}</div>
+            <div class="td-sub">—</div>
+          </td>
+          <td>
+            <span class="${c.loyalty ? 'loyalty-yes' : 'loyalty-no'}">${c.loyalty ? 'Yes' : 'No'}</span>
+          </td>
+          <td>
+            <div>${c.dob}</div>
+            <div class="td-sub">${c.gender}</div>
+          </td>
+          <td>
+            <div>${c.channel}</div>
+            <div class="td-sub">${c.date}</div>
+          </td>
+          <td><div style="color:var(--lui-text-secondary);">—</div></td>
+          <td>
+            <button class="more-btn" title="More actions">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+            </button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
